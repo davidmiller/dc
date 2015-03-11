@@ -146,7 +146,7 @@ class Dataset(object):
             resource['package_id'] = pkg['id']
             name = resource['name']
 
-            existing = [r for r in pkg['resources'] if r['name'] in [name, resource.get('old_name','')]
+            existing = [r for r in pkg['resources'] if r['name'] in [name, resource.get('old_name','')] ]
             if not existing:
                 # Nothin exists with the same name, we need to create it
                 print 'Creating resource'
