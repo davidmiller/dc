@@ -146,7 +146,7 @@ class Dataset(object):
             resource['package_id'] = pkg['id']
             name = resource['name']
 
-            existing = [r for r in pkg['resources'] if r['name'] == name]
+            existing = [r for r in pkg['resources'] if r['name'] == name or r['name'] == resource.get('old_name','')]
             if not existing:
                 print 'Creating resource'
                 ckan.action.resource_create(**resource)
@@ -160,6 +160,8 @@ class Dataset(object):
                 print 'Updating resource'
                 existing.update(resource)
                 ckan.action.resource_update(**existing)
+            else:
+                print "Resource has not changed"
         return
 
     @staticmethod
