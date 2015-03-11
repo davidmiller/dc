@@ -146,7 +146,7 @@ class Dataset(object):
             resource['package_id'] = pkg['id']
             name = resource['name']
 
-            existing = [r for r in pkg['resources'] if r['hash'] resource.get('hash','')]
+            existing = [r for r in pkg['resources'] if r['hash'] == resource.get('hash','')]
             if not existing:
                 print 'Creating resource'
                 ckan.action.resource_create(**resource)
