@@ -146,8 +146,9 @@ class Dataset(object):
             resource['package_id'] = pkg['id']
             name = resource['name']
 
-            existing = [r for r in pkg['resources'] if r['hash'] == resource.get('hash','')]
+            existing = [r for r in pkg['resources'] if r['name'] in [name, resource.get('old_name','')]
             if not existing:
+                # Nothin exists with the same name, we need to create it
                 print 'Creating resource'
                 ckan.action.resource_create(**resource)
             elif 'upload' in resource:
@@ -161,8 +162,8 @@ class Dataset(object):
                 existing.update(resource)
                 ckan.action.resource_update(**existing)
             else:
-                existing = existing[0]
                 print 'Updating resource'
+                existing = existing[0]
                 existing.update(resource)
                 ckan.action.resource_update(**existing)
 
