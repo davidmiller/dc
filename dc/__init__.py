@@ -144,10 +144,9 @@ class Dataset(object):
                 resource['size'] = size
 
             resource['package_id'] = pkg['id']
-            url = resource['url']
-            old_url = resource.get('old_url')
+            name = resource['name']
 
-            existing = [r for r in pkg['resources'] if r['url'] in [url, old_url] ]
+            existing = [r for r in pkg['resources'] if r['name'] == name  ]
             if not existing:
                 # Nothin exists with the same name, we need to create it
                 print 'Creating resource'
@@ -163,11 +162,9 @@ class Dataset(object):
                 existing.update(resource)
                 ckan.action.resource_update(**existing)
             else:
-                print 'Updating resource'
+                print "Updating Resource "
                 existing = existing[0]
                 existing.update(resource)
-                if 'old_url' in existing:
-                    del existing['old_url']
                 ckan.action.resource_update(**existing)
 
         return
