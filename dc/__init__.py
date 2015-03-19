@@ -107,6 +107,23 @@ def ensure_group(name):
     ckan.action.group_create(**grp)
     return
 
+def find_named_resource(resources, name):
+    for r in resources:
+        if r['name'] == name:
+            return r
+    return None
+
+def merge_resources(existing_resources, new_resources):
+    resources = []
+    for new_resource in new_resources:
+        name = new_resource['name']
+        e = find_named_resource(existing_resources, name)
+        if not e:
+            e = new_resource
+        else:
+            e.update(new_resource)
+        resources.append(e)
+    return resources
 
 class Dataset(object):
     """
@@ -119,54 +136,16 @@ class Dataset(object):
         resources = deets.pop('resources')
 
         try:
+            print "Updating Package"
             pkg =  ckan.action.package_show(id=deets['name'])
             pkg.update(deets)
+            pkg['resources'] = merge_resources(pkg['resources'], resources)
             ckan.action.package_update(**pkg)
         except ckanapi.errors.NotFound:
+            print "Creating Package"
             pkg = ckan.action.package_create(**deets)
 
         logging.info(json.dumps(pkg, indent=2))
-
-        # If we are uploading a file, we should check to see
-        # whether the file is different based on the hash
-        for resource in resources:
-            checksum = None
-
-            if 'upload' in resource:
-                fh = resource['upload']
-                contents = fh.read()
-                size = fh.tell()
-
-                # Reset the file pointer so ckanapi can read the whole file.
-                fh.seek(0)
-                checksum = hashlib.md5(contents).hexdigest()
-                resource['hash'] = checksum
-                resource['size'] = size
-
-            resource['package_id'] = pkg['id']
-            name = resource['name']
-
-            existing = [r for r in pkg['resources'] if r['name'] == name  ]
-            if not existing:
-                # Nothin exists with the same name, we need to create it
-                print 'Creating resource'
-                ckan.action.resource_create(**resource)
-            elif 'upload' in resource:
-                # We only do updates on the resources when the hash might
-                # be different.
-                existing = existing[0]
-                if existing['hash'] == checksum:
-                    print 'Unchanged'
-                    continue # It's not updated
-                print 'Updating resource'
-                existing.update(resource)
-                ckan.action.resource_update(**existing)
-            else:
-                print "Updating Resource "
-                existing = existing[0]
-                existing.update(resource)
-                ckan.action.resource_update(**existing)
-
         return
 
     @staticmethod
