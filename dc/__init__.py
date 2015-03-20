@@ -143,6 +143,7 @@ class Dataset(object):
             ckan.action.package_update(**pkg)
         except ckanapi.errors.NotFound:
             print "Creating Package"
+            deets['resources'] = resources
             pkg = ckan.action.package_create(**deets)
 
         logging.info(json.dumps(pkg, indent=2))
