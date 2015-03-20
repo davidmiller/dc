@@ -136,8 +136,8 @@ class Dataset(object):
         resources = deets.pop('resources')
 
         try:
-            print "Updating Package"
             pkg =  ckan.action.package_show(id=deets['name'])
+            print "Updating Package"
             pkg.update(deets)
             pkg['resources'] = merge_resources(pkg['resources'], resources)
             ckan.action.package_update(**pkg)
